@@ -1,0 +1,43 @@
+import cv2
+import math
+
+# инициализация поиска лица (по умолчанию каскад Хаара)
+
+face_cascade_db = cv2.CascadeClassifier(cv2.data.haarcascades+"haarcascade_frontalface_default.xml")
+
+# инициализация поиска глаз (по умолчанию каскад Хаара)
+
+eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades+"haarcascade_eye_tree_eyeglasses.xml")
+
+#загрузка изображения
+
+image = cv2.resize(cv2.imread('1.pgm'), (0, 0), fx=4, fy=4)
+
+#преобразование изображения к оттенкам серого
+
+image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# обнаружение всех лиц на изображении
+faces = face_cascade_db.detectMultiScale(image_gray, 1.1, 19)
+
+#построение центральной линии
+
+for x, y, width, height in faces:
+    center_x = int(x + 0.5 * width)
+    center_y = int(y + 0.5 * height)
+    cv2.line(image, (center_x, center_y + 1000), (center_x, center_y - 1000), (255, 0, 0), 2)
+
+    eyes = eye_cascade.detectMultiScale(image_gray)
+    
+#построение локальных линий
+
+    for (ex, ey, ewidth, eheight) in eyes:
+        eye_x = int(ex + 0.5 * ewidth)
+        eye_y = int(ey + 0.5 * eheight)
+        cv2.line(image, (eye_x, eye_y + 1000), (eye_x, eye_y - 1000), (255, 0, 0), 2)
+        distance = math.sqrt((center_x - eye_x) ** 2 + (center_y - eye_y) ** 2)
+        print(distance)
+
+# вывод изображения с обнаруженными лицами
+cv2.imshow('rez', image)
+cv2.waitKey()
